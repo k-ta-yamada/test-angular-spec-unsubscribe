@@ -1,31 +1,44 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { DummyComponent } from './dummy/dummy.component';
 
 describe('AppComponent', () => {
+  let component: AppComponent;
+  let fixture: ComponentFixture<AppComponent>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        AppComponent
-      ],
+      declarations: [AppComponent, DummyComponent],
     }).compileComponents();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it(`should have as title 'test-angular-spec-unsubscribe'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('test-angular-spec-unsubscribe');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
+  beforeEach(() => {
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('test-angular-spec-unsubscribe app is running!');
+  });
+
+  beforeAll(() => console.group('AppComponent::Spec'));
+  afterAll(() => console.groupEnd());
+
+  [...Array(3)].map((v, i) => {
+    it(`should create the app ${i}`, (done) => {
+      console.group(`Spec ${i}`);
+
+      component.child!.subject$.subscribe(val => {
+        console.group('AppComponent::Spec::subscribe');
+        console.log(`msg: [${val}]`);
+        expect(val).toBeDefined();
+        done();
+        console.groupEnd();
+      });
+
+      component.ngOnInit();
+
+      const msg = `AppComponent::Spec ${i}`;
+      console.log(`sned msg: [${msg}]`);
+      component.child?.subject$.next(msg);
+      console.groupEnd();
+    });
   });
 });
